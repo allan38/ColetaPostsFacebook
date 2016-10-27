@@ -1,0 +1,96 @@
+  <!DOCTYPE html>
+    <html>
+  <head>
+  	<meta charset="utf-8">
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  	<title>Teste API Facebook</title>
+  	<link rel="stylesheet" href="">
+  </head>
+  <body>
+   <button id="create">Create file</button> 
+   <a download="posts.txt" id="downloadlink" style="display: none">Download</a>
+      <script>
+
+      var posts;
+  //Inicializa e configura o SDK do Facebook
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1764235443864257',
+        xfbml      : true,
+        version    : 'v2.7'
+      });
+
+        FB.getLoginStatus(function(response){
+    	if(response.status === 'connected'){
+    		document.getElementById('status').innerHTML = "Conectado";
+    		var token = response.authResponse.accessToken;
+    		console.log(token);
+    	
+
+    		FB.api(
+    	        '/525723337610177/feed',
+              function (response) {
+                  if (response && !response.error) {
+                  	//console.log("JSON: " + JSON.stringify(response));
+                      posts = response.data;
+
+                      for(var i = 0; i<posts.length;i++){
+                      	console.log(posts[i].message);
+                      }
+
+//Função que transforma texto em arquivo
+  (function () {
+  var textFile = null,
+    makeTextFile = function (text) {
+      var data = new Blob([text], {type: 'text/plain'});
+
+      // If we are replacing a previously generated file we need to
+      // manually revoke the object URL to avoid memory leaks.
+      if (textFile !== null) {
+        window.URL.revokeObjectURL(textFile);
+      }
+
+      textFile = window.URL.createObjectURL(data);
+
+      return textFile;
+    };
+
+
+    var create = document.getElementById('create');
+
+    //Função que recebe um array de posts e escreve no arquivo no formato json
+    create.addEventListener('click', function () {
+      var link = document.getElementById('downloadlink');
+      link.href = makeTextFile(JSON.stringify(posts));
+      link.style.display = 'block';
+    }, false);
+  })();
+                  }
+              }
+          );
+
+    	}else if(response.status === 'not_authorized'){
+    		document.getElementById('status').innerHTML = "Não está Logado";
+    	}
+
+    });
+
+
+    };
+
+
+    (function(d, s, id){
+       var js, fjs = d.getElementsByTagName(s)[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement(s); js.id = id;
+       js.src = "//connect.facebook.net/en_US/sdk.js";
+       fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));
+
+      </script>
+
+  <div id="status"></div>
+  	
+  </body>
+  </html>
+
